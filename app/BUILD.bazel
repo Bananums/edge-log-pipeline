@@ -1,0 +1,29 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "app_lib",
+    srcs = [
+        "src/logger.cc"
+    ],
+    hdrs = [
+        "include/app/logger.h"
+    ],
+    includes = ["include"],
+    deps = [
+       "//third_party/quill:quill"
+    ],
+    local_defines = [
+
+    ],
+    copts = ["-Wall", "-Wextra", "-Wpedantic"],
+    visibility = [
+        "//app:__pkg__",
+    ],
+)
+
+cc_binary(
+    name = "app",
+    srcs = ["src/main.cc"],
+    deps = [":app_lib"],
+    visibility = ["//visibility:public"],
+)

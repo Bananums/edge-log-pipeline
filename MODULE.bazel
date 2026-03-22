@@ -1,0 +1,34 @@
+module(
+    name = "edge-log-pipeline",
+    version = "0.0.1",
+)
+
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_oci", version = "2.3.0")
+bazel_dep(name = "rules_pkg", version = "1.2.0")
+bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+
+bazel_dep(name = "quill", version = "11.1.0")
+single_version_override(
+    module_name = "quill",
+    version = "11.1.0",
+    patches = ["//third_party/quill:quill_bazel9.patch"],
+    patch_strip = 1,
+)
+
+# Repo for distroless images: https://github.com/googlecontainertools/distroless
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "gcr_distroless_cc_debian12",
+    image = "gcr.io/distroless/cc-debian12",
+    tag = "latest",
+    platforms = [
+        "linux/amd64",
+    ],
+)
+use_repo(oci,
+    "gcr_distroless_cc_debian12",
+)

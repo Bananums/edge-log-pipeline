@@ -1,0 +1,8 @@
+
+exports_files(["quill_bazel9.patch"])
+
+alias(
+    name = "quill",
+    actual = "@quill//:quill",
+    visibility = ["//visibility:public"],
+)
