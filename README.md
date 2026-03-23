@@ -40,3 +40,15 @@ Just a playground repo to test out Grafana for edge log pipeline
 * http://localhost:3100/metrics: Exposes Prometheus-style metrics about Loki itself. Ingestion rate, query performance, memory usage etc.
 * http://localhost:3100/config: Returns the full resolved config Loki is actually running with. Very useful for debugging shows if config.yaml was parsed correctly and shows all the defaults Loki filled in automatically.
 * http://localhost:3100/loki/api/v1/labels: Returns all log labels Loki currently knows about. Right now it wil. return an empty result since no logs have been pushed yet — but this is a good one to bookmark for when Alloy is running.
+
+## Check Logs arrive in Loki ##
+```shell
+curl "http://localhost:3100/loki/api/v1/query_range" \
+--data-urlencode 'query={app="edge-log-pipeline"}' \
+--data-urlencode 'limit=10'
+```
+
+## Check Grafana datasources ##
+```shell
+curl http://admin:admin@localhost:3000/api/datasources
+```

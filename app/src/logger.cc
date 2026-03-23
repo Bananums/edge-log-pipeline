@@ -82,7 +82,7 @@ void QuillLogTest() {
   colours.assign_colour_to_log_level(quill::LogLevel::Info, quill::ConsoleSinkConfig::Colours::blue);
   console_cfg.set_colours(colours);
 
-  const char* sink_path = "/home/snackers/log/example_json.log";
+  const char* sink_path = "/opt/bananums/log/example_json.log";
 
   // Create a json file for output
   auto json_sink = quill::Frontend::create_or_get_sink<CustomJsonFileSink>(

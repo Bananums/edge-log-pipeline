@@ -28,6 +28,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
       - ${GRAFANA_DATA_DIR}:/var/lib/grafana
     depends_on:
       loki:
