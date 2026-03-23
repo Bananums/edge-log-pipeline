@@ -1,0 +1,74 @@
+// -----------------------------------------------------------------------------
+// 1. Find the log files to tail.
+//    Watches for any .log file in the mounted app log directory.
+// -----------------------------------------------------------------------------
+local.file_match "app_logs" {
+  path_targets = [{
+    "__path__" = "/var/log/app/*.log",
+  }]
+  sync_period = "5s"
+}
+
+// -----------------------------------------------------------------------------
+// 2. Tail the matched files and forward to the processing pipeline.
+// -----------------------------------------------------------------------------
+loki.source.file "app_logs" {
+  targets    = local.file_match.app_logs.targets
+  forward_to = [loki.process.parse_json.receiver]
+}
+
+// -----------------------------------------------------------------------------
+// 3. Process each log line:
+//    - Parse the JSON body
+//    - Extract severity and logger as labels (queryable in Loki/Grafana)
+//    - Parse the millisecond epoch timestamp
+//    - Add a static app label so you can identify the source
+// -----------------------------------------------------------------------------
+loki.process "parse_json" {
+  // Parse the raw log line as JSON, making all fields available as extracted values.
+  stage.json {
+    expressions = {
+      severity  = "severity",
+      logger    = "logger",
+      timestamp = "timestamp",
+      message   = "message",
+    }
+  }
+
+  // Promote severity and logger to Loki labels.
+  // Keep the label set small — only fields you will actually filter by.
+  // Every unique label combination creates a new Loki stream.
+  stage.labels {
+    values = {
+      severity = "severity",
+      logger   = "logger",
+    }
+  }
+
+  // Parse the millisecond epoch timestamp and use it as the log entry time.
+  // Without this, Loki would use the ingestion time instead of the actual
+  // log time — making historical or batched logs appear at the wrong time.
+  stage.timestamp {
+    source = "timestamp"
+    format = "UnixMs"
+  }
+
+  // Add a static label identifying the application.
+  // Useful when you later add more services to the same Loki instance.
+  stage.static_labels {
+    values = {
+      app = "edge-log-pipeline",
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+// -----------------------------------------------------------------------------
+// 4. Write processed logs to Loki.
+// -----------------------------------------------------------------------------
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

@@ -42,3 +42,6 @@
 
 # Bazel
 .clwb
+
+# Docker
+.env
