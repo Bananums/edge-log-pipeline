@@ -12,6 +12,24 @@
 #include <cstdint>
 #include <string_view>
 
+#include <iostream>
+
+bool GetStrEnv(const char* name, char* buffer, const size_t buffer_size) {
+  const char* value = std::getenv(name);
+  if (!value) {
+    return false;
+  }
+
+  const size_t len = std::strlen(value);
+
+  if (len >= buffer_size) {
+    return false;
+  }
+
+  std::memcpy(buffer, value, len+1);
+  return true;
+}
+
 // Custom JSON sink that overrides the default field names to follow
 // OpenTelemetry conventions and outputs epoch milliseconds for timestamp.
 class CustomJsonFileSink : public quill::JsonFileSink {
@@ -82,7 +100,21 @@ void QuillLogTest() {
   colours.assign_colour_to_log_level(quill::LogLevel::Info, quill::ConsoleSinkConfig::Colours::blue);
   console_cfg.set_colours(colours);
 
-  const char* sink_path = "/opt/bananums/log/example_json.log";
+  static constexpr size_t kBufferSize{256};
+  char buffer[kBufferSize];
+
+  if (!GetStrEnv("HOME", buffer, kBufferSize)) {
+    return;
+  }
+
+  char path[kBufferSize];
+  static constexpr auto kLogSuffix = "%s/tel/log/app.log";
+  const int written = std::snprintf(path, kBufferSize, kLogSuffix, buffer);
+  if (written < 0 || static_cast<size_t>(written) >= kBufferSize) {
+    return;
+  }
+
+  const char* sink_path = path;
 
   // Create a json file for output
   auto json_sink = quill::Frontend::create_or_get_sink<CustomJsonFileSink>(
@@ -108,6 +140,8 @@ void QuillLogTest() {
   // will only apply to the console output (via console_sink).
   quill::Logger* hybrid_logger = quill::Frontend::create_or_get_logger(
     "hybrid_logger", {std::move(json_sink_2), std::move(console_sink)}, console_log_pattern);
+
+  LOG_INFO(hybrid_logger, "Set up path {path}", path);
 
   for (int i = 2; i < 4; ++i){
     LOG_INFO(hybrid_logger, "{method} to {endpoint} took {elapsed} ms", "POST", "http://", 10 * i);

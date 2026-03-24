@@ -3,4 +3,6 @@
 
 void QuillLogTest();
 
+bool GetStrEnv();
+
 #endif //EDGE_LOG_PIPELINE_LOGGER_H
