@@ -3,10 +3,12 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 cc_library(
     name = "app_lib",
     srcs = [
-        "src/logger.cc"
+        "src/logger.cc",
+        "src/signals.cc"
     ],
     hdrs = [
-        "include/app/logger.h"
+        "include/app/logger.h",
+        "include/app/signals.h"
     ],
     includes = ["include"],
     deps = [

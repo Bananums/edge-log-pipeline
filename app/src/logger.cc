@@ -186,7 +186,7 @@ class CustomJsonFileSink : public quill::JsonFileSink {
   }
 };
 
-void QuillLogTest() {
+quill::Logger* GetLogger() {
   // Start the backend thread
   quill::BackendOptions backend_options;
   quill::Backend::start(backend_options);
@@ -204,14 +204,14 @@ void QuillLogTest() {
   char buffer[kBufferSize];
 
   if (!GetStrEnv("HOME", buffer, kBufferSize)) {
-    return;
+    return nullptr;
   }
 
   char path[kBufferSize];
   static constexpr auto kLogSuffix = "%s/tel/log/app.log";
   const int written = std::snprintf(path, kBufferSize, kLogSuffix, buffer);
   if (written < 0 || static_cast<size_t>(written) >= kBufferSize) {
-    return;
+    return nullptr;
   }
 
   const char* sink_path = path;
@@ -241,16 +241,5 @@ void QuillLogTest() {
   quill::Logger* hybrid_logger = quill::Frontend::create_or_get_logger(
     "hybrid_logger", {std::move(json_sink_2), std::move(console_sink)}, console_log_pattern);
 
-  LOG_INFO(hybrid_logger, "Set up path {path}", path);
-
-  for (int i = 2; i < 4; ++i){
-    LOG_INFO(hybrid_logger, "{method} to {endpoint} took {elapsed} ms", "POST", "http://", 10 * i);
-  }
-
-  LOG_INFO(hybrid_logger, "Operation {name} completed with code {code}, Data synced successfully", "Update", 123);
-  LOG_DEBUG(hybrid_logger, "This is debug", "");
-  LOG_INFO(hybrid_logger, "This is info", "");
-  LOG_WARNING(hybrid_logger, "This is warning", "");
-  LOG_ERROR(hybrid_logger, "This is error", "");
-
+  return hybrid_logger;
 }
