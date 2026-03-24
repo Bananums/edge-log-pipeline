@@ -48,7 +48,7 @@ class CustomJsonFileSink : public quill::JsonFileSink {
       std::string_view log_level_description,
       std::string_view /* log_level_short_code */,
       std::vector<std::pair<std::string, std::string>> const* named_args,
-      std::string_view /* log_message */,
+      std::string_view log_message,
       std::string_view /* log_statement */,
       char const* message_format) override {
     _json_message.clear();
@@ -67,8 +67,12 @@ class CustomJsonFileSink : public quill::JsonFileSink {
     AppendJsonStringField(_json_message, "severity", log_level_description);
     AppendJsonStringField(
         _json_message,
-        "message",
+        "message_t",
         message_format ? std::string_view{message_format} : std::string_view{});
+    AppendJsonStringField(
+        _json_message,
+        "message",
+        log_message);
 
     if (named_args != nullptr) {
       for (auto const& [key, value] : *named_args) {

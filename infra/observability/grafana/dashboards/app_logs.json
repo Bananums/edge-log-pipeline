@@ -134,7 +134,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "{app=\"edge-log-pipeline\"} | json | line_format \"[{{.severity}}] {{.message}}\"",
+          "expr": "{app=\"edge-log-pipeline\"} | json | line_format \"{{.message}}\"",
           "legendFormat": ""
         }
       ],
