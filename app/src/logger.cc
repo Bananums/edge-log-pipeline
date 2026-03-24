@@ -33,10 +33,10 @@ bool GetStrEnv(const char* name, char* buffer, const size_t buffer_size) {
 // Custom JSON sink that overrides the default field names to follow
 // OpenTelemetry conventions and outputs epoch milliseconds for timestamp.
 class CustomJsonFileSink : public quill::JsonFileSink {
-public:
+ public:
   using quill::JsonFileSink::JsonFileSink;
 
-protected:
+ protected:
   void generate_json_message(
       quill::MacroMetadata const* log_metadata,
       uint64_t log_timestamp,
@@ -50,39 +50,140 @@ protected:
       std::vector<std::pair<std::string, std::string>> const* named_args,
       std::string_view /* log_message */,
       std::string_view /* log_statement */,
-      char const* message_format /* message_format */) override {
+      char const* message_format) override {
     _json_message.clear();
 
     uint64_t const timestamp_ms = log_timestamp / 1000000ULL;
+    int const line_number = ParseIntOrDefault<int>(log_metadata->line(), 0);
+    uint64_t const thread_id_value = ParseIntOrDefault<uint64_t>(thread_id, 0);
 
-    int line_number = 0;
-    {
-      std::string_view const line_sv{log_metadata->line()};
-      std::from_chars(line_sv.data(), line_sv.data() + line_sv.size(), line_number);
-    }
+    _json_message.push_back('{');
 
-    uint64_t thread_id_value = 0;
-    {
-      std::from_chars(thread_id.data(), thread_id.data() + thread_id.size(), thread_id_value);
-    }
+    AppendJsonUIntField(_json_message, "timestamp", timestamp_ms);
+    AppendJsonStringField(_json_message, "file_name", log_metadata->file_name());
+    AppendJsonIntField(_json_message, "line", line_number);
+    AppendJsonUIntField(_json_message, "thread_id", thread_id_value);
+    AppendJsonStringField(_json_message, "logger", logger_name);
+    AppendJsonStringField(_json_message, "severity", log_level_description);
+    AppendJsonStringField(
+        _json_message,
+        "message",
+        message_format ? std::string_view{message_format} : std::string_view{});
 
-    _json_message.append(fmtquill::format(
-        R"({{"timestamp":{},"file_name":"{}","line":{},"thread_id":{},"logger":"{}","severity":"{}","message":"{}")",
-        timestamp_ms,
-        log_metadata->file_name(),
-        line_number,
-        thread_id_value,
-        logger_name,
-        log_level_description,
-        message_format));
-
-    if (named_args) {
+    if (named_args != nullptr) {
       for (auto const& [key, value] : *named_args) {
-        _json_message.append(fmtquill::format(R"(,"{}":"{}")", key, value));
+        AppendJsonStringField(_json_message, key, value);
       }
     }
 
-    //_json_message.push_back('}');
+    // Do not append '}' here.
+    // Quill finalizes the JSON object after this method returns.
+  }
+
+ private:
+  using Buffer = fmtquill::memory_buffer;
+
+  template <typename IntType>
+  static IntType ParseIntOrDefault(std::string_view sv, IntType default_value) {
+    IntType value = default_value;
+    auto const* begin = sv.data();
+    auto const* end = sv.data() + sv.size();
+    auto const result = std::from_chars(begin, end, value);
+
+    if ((result.ec != std::errc{}) || (result.ptr != end)) {
+      return default_value;
+    }
+
+    return value;
+  }
+
+  static void AppendRaw(Buffer& out, std::string_view value) {
+    out.append(value.data(), value.data() + value.size());
+  }
+
+  static void AppendJsonEscaped(Buffer& out, std::string_view value) {
+    for (char ch : value) {
+      switch (ch) {
+        case '"':
+          AppendRaw(out, "\\\"");
+          break;
+        case '\\':
+          AppendRaw(out, "\\\\");
+          break;
+        case '\b':
+          AppendRaw(out, "\\b");
+          break;
+        case '\f':
+          AppendRaw(out, "\\f");
+          break;
+        case '\n':
+          AppendRaw(out, "\\n");
+          break;
+        case '\r':
+          AppendRaw(out, "\\r");
+          break;
+        case '\t':
+          AppendRaw(out, "\\t");
+          break;
+        default: {
+          unsigned char const uch = static_cast<unsigned char>(ch);
+          if (uch < 0x20U) {
+            fmtquill::format_to(std::back_inserter(out), "\\u{:04X}", uch);
+          } else {
+            out.push_back(ch);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  static void AppendFieldPrefix(Buffer& out, std::string_view key) {
+    if (out.size() > 1) {
+      out.push_back(',');
+    }
+
+    out.push_back('"');
+    AppendJsonEscaped(out, key);
+    AppendRaw(out, "\":");
+  }
+
+  static void AppendJsonStringField(
+      Buffer& out,
+      std::string_view key,
+      std::string_view value) {
+    AppendFieldPrefix(out, key);
+    out.push_back('"');
+    AppendJsonEscaped(out, value);
+    out.push_back('"');
+  }
+
+  static void AppendJsonStringField(
+      Buffer& out,
+      std::string_view key,
+      char const* value) {
+    AppendJsonStringField(
+        out,
+        key,
+        value ? std::string_view{value} : std::string_view{});
+  }
+
+  template <typename IntType>
+  static void AppendJsonIntField(
+      Buffer& out,
+      std::string_view key,
+      IntType value) {
+    AppendFieldPrefix(out, key);
+    fmtquill::format_to(std::back_inserter(out), "{}", value);
+  }
+
+  template <typename UIntType>
+  static void AppendJsonUIntField(
+      Buffer& out,
+      std::string_view key,
+      UIntType value) {
+    AppendFieldPrefix(out, key);
+    fmtquill::format_to(std::back_inserter(out), "{}", value);
   }
 };
 
