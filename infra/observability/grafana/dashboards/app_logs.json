@@ -10,50 +10,25 @@
   "panels": [
     {
       "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "gridPos": { "h": 3, "w": 8, "x": 0, "y": 0 },
       "id": 1,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
-        "justifyMode": "center",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": ["count"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "count_over_time({app=\"edge-log-pipeline\"}[24h])",
-          "legendFormat": "Total"
-        }
-      ],
-      "title": "Total Logs (24h)",
-      "type": "stat"
-    },
-    {
-      "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
-      "id": 2,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["count"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
+        "textMode": "value_and_name",
+        "text": { "titleSize": 14, "valueSize": 28 }
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "fixedColor": "red", "mode": "fixed" }
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "displayName": "Log Entries"
         },
         "overrides": []
       },
@@ -61,32 +36,34 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "count_over_time({app=\"edge-log-pipeline\", severity=\"ERROR\"}[24h])",
-          "legendFormat": "Errors"
+          "expr": "count_over_time({app=\"edge-log-pipeline\"}[24h])",
+          "legendFormat": "Log Entries"
         }
       ],
-      "title": "Errors (24h)",
+      "title": "",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
-      "id": 3,
+      "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
+      "gridPos": { "h": 3, "w": 8, "x": 8, "y": 0 },
+      "id": 2,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
-        "justifyMode": "center",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": ["count"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value_and_name",
+        "text": { "titleSize": 14, "valueSize": 28 }
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "fixedColor": "orange", "mode": "fixed" }
+          "color": { "mode": "fixed", "fixedColor": "orange" },
+          "displayName": "Warnings"
         },
         "overrides": []
       },
@@ -98,59 +75,74 @@
           "legendFormat": "Warnings"
         }
       ],
-      "title": "Warnings (24h)",
+      "title": "",
       "type": "stat"
     },
     {
       "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
-      "id": 4,
+      "gridPos": { "h": 3, "w": 8, "x": 16, "y": 0 },
+      "id": 3,
       "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": true,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["count"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name",
+        "text": { "titleSize": 14, "valueSize": 28 }
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" },
+          "displayName": "Errors"
+        },
+        "overrides": []
+      },
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "{app=\"edge-log-pipeline\"} | json",
-          "legendFormat": ""
+          "expr": "count_over_time({app=\"edge-log-pipeline\", severity=\"ERROR\"}[24h])",
+          "legendFormat": "Errors"
         }
       ],
-      "title": "All Logs",
-      "type": "logs"
+      "title": "",
+      "type": "stat"
     },
     {
       "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
-      "id": 5,
+      "gridPos": { "h": 20, "w": 24, "x": 0, "y": 3 },
+      "id": 4,
       "options": {
         "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": true,
+        "enableLogDetails": false,
+        "prettifyLogMessage": false,
         "showCommonLabels": false,
         "showLabels": false,
         "showTime": true,
         "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "wrapLogMessage": false
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
       },
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "{app=\"edge-log-pipeline\", severity=\"ERROR\"} | json",
+          "expr": "{app=\"edge-log-pipeline\"} | json | line_format \"[{{.severity}}] {{.message}}\"",
           "legendFormat": ""
         }
       ],
-      "title": "Errors Only",
+      "title": "Log Entries",
       "type": "logs"
     }
   ],
-  "refresh": "10s",
+  "refresh": "5m",
   "schemaVersion": 39,
   "tags": ["logs", "cpp", "quill"],
   "time": { "from": "now-1h", "to": "now" },

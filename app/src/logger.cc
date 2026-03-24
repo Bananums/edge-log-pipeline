@@ -48,9 +48,9 @@ protected:
       std::string_view log_level_description,
       std::string_view /* log_level_short_code */,
       std::vector<std::pair<std::string, std::string>> const* named_args,
-      std::string_view log_message,
+      std::string_view /* log_message */,
       std::string_view /* log_statement */,
-      char const* /* message_format */) override {
+      char const* message_format /* message_format */) override {
     _json_message.clear();
 
     uint64_t const timestamp_ms = log_timestamp / 1000000ULL;
@@ -74,7 +74,7 @@ protected:
         thread_id_value,
         logger_name,
         log_level_description,
-        log_message));
+        message_format));
 
     if (named_args) {
       for (auto const& [key, value] : *named_args) {
