@@ -65,14 +65,9 @@ class CustomJsonFileSink : public quill::JsonFileSink {
     AppendJsonUIntField(_json_message, "thread_id", thread_id_value);
     AppendJsonStringField(_json_message, "logger", logger_name);
     AppendJsonStringField(_json_message, "severity", log_level_description);
-    AppendJsonStringField(
-        _json_message,
-        "message_t",
-        message_format ? std::string_view{message_format} : std::string_view{});
-    AppendJsonStringField(
-        _json_message,
-        "message",
-        log_message);
+    AppendJsonStringField(_json_message, "message", log_message);
+    AppendJsonStringField( _json_message, "message_t",
+      message_format ? std::string_view{message_format} : std::string_view{});
 
     if (named_args != nullptr) {
       for (auto const& [key, value] : *named_args) {

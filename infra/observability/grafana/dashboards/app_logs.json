@@ -13,17 +13,11 @@
       "gridPos": { "h": 3, "w": 8, "x": 0, "y": 0 },
       "id": 1,
       "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["count"],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
-        },
-        "textMode": "value_and_name",
-        "text": { "titleSize": 14, "valueSize": 28 }
+        }
       },
       "fieldConfig": {
         "defaults": {
@@ -36,7 +30,8 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "count_over_time({app=\"edge-log-pipeline\"}[24h])",
+          "expr": "sum(count_over_time({app=\"edge-log-pipeline\"}[24h]))",
+          "instant": true,
           "legendFormat": "Log Entries"
         }
       ],
@@ -48,17 +43,11 @@
       "gridPos": { "h": 3, "w": 8, "x": 8, "y": 0 },
       "id": 2,
       "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["count"],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
-        },
-        "textMode": "value_and_name",
-        "text": { "titleSize": 14, "valueSize": 28 }
+        }
       },
       "fieldConfig": {
         "defaults": {
@@ -71,7 +60,8 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "count_over_time({app=\"edge-log-pipeline\", severity=\"WARNING\"}[24h])",
+          "expr": "sum(count_over_time({app=\"edge-log-pipeline\", severity=\"WARNING\"}[24h]))",
+          "instant": true,
           "legendFormat": "Warnings"
         }
       ],
@@ -83,17 +73,11 @@
       "gridPos": { "h": 3, "w": 8, "x": 16, "y": 0 },
       "id": 3,
       "options": {
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["count"],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
-        },
-        "textMode": "value_and_name",
-        "text": { "titleSize": 14, "valueSize": 28 }
+        }
       },
       "fieldConfig": {
         "defaults": {
@@ -106,7 +90,8 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
-          "expr": "count_over_time({app=\"edge-log-pipeline\", severity=\"ERROR\"}[24h])",
+          "expr": "sum(count_over_time({app=\"edge-log-pipeline\", severity=\"ERROR\"}[24h]))",
+          "instant": true,
           "legendFormat": "Errors"
         }
       ],
